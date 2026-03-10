@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Explorations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #1c1917; /* stone-900 */
+        }
+        
+        /* Hide scrollbar for horizontal scroll areas */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Mock Task Card Styles */
+        .mock-card {
+            background: white;
+            border-radius: 1.5rem; /* 3xl */
+            padding: 1.25rem; /* p-5 */
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            border: 1px solid #f5f5f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .mock-card-content {
+            flex: 1;
+        }
+        .mock-card-title {
+            font-weight: 600;
+            font-size: 1.125rem; /* text-lg */
+            margin-bottom: 0.5rem;
+        }
+        .mock-card-tag {
+            font-size: 0.625rem; /* text-[10px] */
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            display: inline-block;
+        }
+        .mock-card-action {
+            width: 3.5rem; /* w-14 */
+            height: 3.5rem; /* h-14 */
+            border-radius: 9999px;
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-left: 1rem;
+        }
+        .mock-card-ring {
+            width: 4rem; /* w-16 */
+            height: 4rem; /* h-16 */
+            border-radius: 50%;
+            border: 4px solid #e0e7ff; /* indigo-100 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        /* Layout Container */
+        .layout-section {
+            padding: 4rem 2rem;
+            border-bottom: 2px dashed #d6d3d1; /* stone-300 */
+        }
+        .layout-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .layout-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+        .layout-desc {
+            color: #78716c; /* stone-500 */
+            max-width: 600px;
+            margin: 0.5rem auto 0;
+        }
+
+        /* Mobile Frame Mockup */
+        .mobile-frame {
+            width: 375px;
+            height: 812px;
+            background: #f5f5f4;
+            border: 12px solid #1c1917;
+            border-radius: 2.5rem;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        .mobile-header {
+            padding: 1.5rem 1.5rem 1rem;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Desktop Frame Mockup */
+        .desktop-frame {
+            width: 100%;
+            max-width: 1200px;
+            height: 700px;
+            background: #f5f5f4;
+            border: 8px solid #1c1917;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================
+         MOBILE SOLUTIONS
+         ========================================== -->
+
+    <!-- Mobile A: Scrollable Tabs (Pills) -->
+    <div class="layout-section">
+        <div class="layout-header">
+            <h2 class="layout-title">手機版 方案 A：頂部橫向滑動標籤 (Scrollable Tabs)</h2>
+            <p class="layout-desc">最直覺的分類方式。點擊標籤，下方列表瞬間過濾。適合單手操作，不會迷失方向。</p>
+        </div>
+        
+        <div class="mobile-frame">
+            <div class="mobile-header shadow-sm">
+                <h1 class="text-xl font-bold text-indigo-600 mb-4">This Week</h1>
+                <!-- The Scrollable Pills -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                    <button class="px-4 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-full whitespace-nowrap">全部 (8)</button>
+                    <button class="px-4 py-1.5 bg-stone-200 text-stone-600 text-sm font-medium rounded-full whitespace-nowrap">浴室組 (3)</button>
+                    <button class="px-4 py-1.5 bg-stone-200 text-stone-600 text-sm font-medium rounded-full whitespace-nowrap">運動組 (2)</button>
+                    <button class="px-4 py-1.5 bg-stone-200 text-stone-600 text-sm font-medium rounded-full whitespace-nowrap">學習組 (3)</button>
+                </div>
+            </div>
+            <div class="p-4 overflow-y-auto h-full pb-32">
+                <!-- Task Cards -->
+                <div class="mock-card">
+                    <div class="mock-card-content">
+                        <div class="mock-card-title">超慢跑 30 分鐘</div>
+                        <span class="mock-card-tag bg-orange-100 text-orange-700">運動組</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="mock-card-ring">1/3</div>
+                        <div class="mock-card-action">+</div>
+                    </div>
+                </div>
+                <div class="mock-card">
+                    <div class="mock-card-content">
+                        <div class="mock-card-title">重量訓練</div>
+                        <span class="mock-card-tag bg-orange-100 text-orange-700">運動組</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="mock-card-ring">0/2</div>
+                        <div class="mock-card-action">+</div>
+                    </div>
+                </div>
+                <div class="mock-card opacity-60 border-emerald-200 bg-emerald-50">
+                    <div class="mock-card-content">
+                        <div class="mock-card-title text-emerald-900">使用漱口水</div>
+                        <span class="mock-card-tag bg-cyan-100 text-cyan-700">浴室組</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="mock-card-ring border-emerald-500 text-emerald-600">7/7</div>
+                        <div class="mock-card-action bg-emerald-500">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile B: Horizontal Carousel -->
+    <div class="layout-section">
+        <div class="layout-header">
+            <h2 class="layout-title">手機版 方案 B：橫向卡片輪播 (Horizontal Carousel)</h2>
+            <p class="layout-desc">垂直空間留給「分類標題」，每個分類內的任務橫向滑動。適合每個分類只有 2-4 個任務的情況，能一眼看到所有分類。</p>
+        </div>
+        
+        <div class="mobile-frame">
+            <div class="mobile-header">
+                <h1 class="text-xl font-bold text-indigo-600">This Week</h1>
+            </div>
+            <div class="p-4 overflow-y-auto h-full pb-32">
+                
+                <!-- Category 1 -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3 ml-1">運動組</h3>
+                    <!-- Horizontal Scroll Area -->
+                    <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 snap-x">
+                        <div class="mock-card min-w-[280px] snap-center m-0">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title">超慢跑 30 分鐘</div>
+                                <div class="text-xs text-stone-500 mt-2">2 more to go</div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="mock-card-action m-0">+</div>
+                                <div class="text-sm font-bold text-indigo-600">1/3</div>
+                            </div>
+                        </div>
+                        <div class="mock-card min-w-[280px] snap-center m-0">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title">重量訓練</div>
+                                <div class="text-xs text-stone-500 mt-2">2 more to go</div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="mock-card-action m-0">+</div>
+                                <div class="text-sm font-bold text-indigo-600">0/2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 2 -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-wider mb-3 ml-1">浴室組</h3>
+                    <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 snap-x">
+                        <div class="mock-card min-w-[280px] snap-center m-0 opacity-60 border-emerald-200 bg-emerald-50">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title text-emerald-900">使用漱口水</div>
+                                <div class="text-xs text-emerald-600 mt-2">Goal reached!</div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="mock-card-action m-0 bg-emerald-500">+</div>
+                                <div class="text-sm font-bold text-emerald-600">7/7</div>
+                            </div>
+                        </div>
+                        <div class="mock-card min-w-[280px] snap-center m-0">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title">使用牙線</div>
+                                <div class="text-xs text-stone-500 mt-2">3 more to go</div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="mock-card-action m-0">+</div>
+                                <div class="text-sm font-bold text-indigo-600">4/7</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         DESKTOP SOLUTIONS
+         ========================================== -->
+
+    <!-- Desktop 1: Sidebar Navigation -->
+    <div class="layout-section">
+        <div class="layout-header">
+            <h2 class="layout-title">桌機版 方案 1：側邊欄導覽 (Sidebar Navigation)</h2>
+            <p class="layout-desc">經典的兩欄式佈局。左側是分類目錄，右側是該分類的詳細任務。結構最清晰，適合任務總數極多的情況。</p>
+        </div>
+        
+        <div class="desktop-frame">
+            <!-- Sidebar -->
+            <div class="w-64 bg-white border-r border-stone-200 p-6 flex flex-col">
+                <h1 class="text-2xl font-bold text-indigo-600 mb-8">Weekly Pulse</h1>
+                <nav class="space-y-2 flex-1">
+                    <a href="#" class="flex items-center justify-between px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium">
+                        <span>全部任務</span>
+                        <span class="bg-indigo-100 text-indigo-600 text-xs py-0.5 px-2 rounded-full">8</span>
+                    </a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 text-stone-600 hover:bg-stone-50 rounded-lg font-medium">
+                        <span>浴室組</span>
+                        <span class="bg-stone-100 text-stone-500 text-xs py-0.5 px-2 rounded-full">3</span>
+                    </a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 text-stone-600 hover:bg-stone-50 rounded-lg font-medium">
+                        <span>運動組</span>
+                        <span class="bg-stone-100 text-stone-500 text-xs py-0.5 px-2 rounded-full">2</span>
+                    </a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 text-stone-600 hover:bg-stone-50 rounded-lg font-medium">
+                        <span>學習組</span>
+                        <span class="bg-stone-100 text-stone-500 text-xs py-0.5 px-2 rounded-full">3</span>
+                    </a>
+                </nav>
+            </div>
+            <!-- Main Content -->
+            <div class="flex-1 p-10 overflow-y-auto bg-stone-50">
+                <div class="max-w-3xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-3xl font-bold text-stone-900">全部任務</h2>
+                            <p class="text-stone-500 mt-1">Mar 2 - Mar 8</p>
+                        </div>
+                        <span class="bg-indigo-100 text-indigo-800 text-sm font-bold px-3 py-1 rounded-full">5 days left</span>
+                    </div>
+                    
+                    <!-- Grid of cards for desktop -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="mock-card m-0">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title">超慢跑 30 分鐘</div>
+                                <span class="mock-card-tag bg-orange-100 text-orange-700">運動組</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="mock-card-ring">1/3</div>
+                                <div class="mock-card-action">+</div>
+                            </div>
+                        </div>
+                        <div class="mock-card m-0">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title">重量訓練</div>
+                                <span class="mock-card-tag bg-orange-100 text-orange-700">運動組</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="mock-card-ring">0/2</div>
+                                <div class="mock-card-action">+</div>
+                            </div>
+                        </div>
+                        <div class="mock-card m-0 opacity-60 border-emerald-200 bg-emerald-50">
+                            <div class="mock-card-content">
+                                <div class="mock-card-title text-emerald-900">使用漱口水</div>
+                                <span class="mock-card-tag bg-cyan-100 text-cyan-700">浴室組</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="mock-card-ring border-emerald-500 text-emerald-600">7/7</div>
+                                <div class="mock-card-action bg-emerald-500">+</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop 2: Bento Grid -->
+    <div class="layout-section">
+        <div class="layout-header">
+            <h2 class="layout-title">桌機版 方案 2：Bento Grid (網格儀表板)</h2>
+            <p class="layout-desc">將每個分類變成一個獨立的區塊 (Card)。視覺衝擊力強，能一眼看清所有分類的狀態。非常適合任務數量在 15 個以內的情況。</p>
+        </div>
+        
+        <div class="desktop-frame flex-col">
+            <!-- Top Nav -->
+            <div class="h-16 bg-white border-b border-stone-200 px-8 flex items-center justify-between shrink-0">
+                <h1 class="text-xl font-bold text-indigo-600">Weekly Pulse</h1>
+                <span class="bg-indigo-100 text-indigo-800 text-sm font-bold px-3 py-1 rounded-full">5 days left</span>
+            </div>
+            
+            <!-- Bento Grid Content -->
+            <div class="flex-1 p-8 overflow-y-auto bg-stone-100">
+                <div class="grid grid-cols-3 gap-6 h-full">
+                    
+                    <!-- Bento Box 1: 運動組 -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-stone-800">運動組</h3>
+                            <span class="text-sm font-medium text-stone-400">1 / 5 總計</span>
+                        </div>
+                        <div class="space-y-4 flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="mock-card m-0 bg-stone-50 border-none shadow-none p-4">
+                                <div class="mock-card-content">
+                                    <div class="font-semibold text-stone-800">超慢跑 30 分鐘</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="font-bold text-indigo-600">1/3</div>
+                                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl">+</div>
+                                </div>
+                            </div>
+                            <div class="mock-card m-0 bg-stone-50 border-none shadow-none p-4">
+                                <div class="mock-card-content">
+                                    <div class="font-semibold text-stone-800">重量訓練</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="font-bold text-indigo-600">0/2</div>
+                                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl">+</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Box 2: 浴室組 -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-stone-800">浴室組</h3>
+                            <span class="text-sm font-medium text-emerald-500">11 / 14 總計</span>
+                        </div>
+                        <div class="space-y-4 flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="mock-card m-0 bg-emerald-50 border-none shadow-none p-4 opacity-70">
+                                <div class="mock-card-content">
+                                    <div class="font-semibold text-emerald-900">使用漱口水</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="font-bold text-emerald-600">7/7</div>
+                                    <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl">+</div>
+                                </div>
+                            </div>
+                            <div class="mock-card m-0 bg-stone-50 border-none shadow-none p-4">
+                                <div class="mock-card-content">
+                                    <div class="font-semibold text-stone-800">使用牙線</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="font-bold text-indigo-600">4/7</div>
+                                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl">+</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Box 3: 學習組 (Spans 2 rows if needed, or just normal) -->
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-stone-800">學習組</h3>
+                            <span class="text-sm font-medium text-stone-400">0 / 3 總計</span>
+                        </div>
+                        <div class="space-y-4 flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="mock-card m-0 bg-stone-50 border-none shadow-none p-4">
+                                <div class="mock-card-content">
+                                    <div class="font-semibold text-stone-800">閱讀 30 分鐘</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="font-bold text-indigo-600">0/3</div>
+                                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl">+</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

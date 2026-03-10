@@ -1,0 +1,5 @@
+{
+  "name": "Weekly Pulse",
+  "description": "A weekly habit tracker based on frequency quotas rather than fixed daily schedules.",
+  "requestFramePermissions": []
+}

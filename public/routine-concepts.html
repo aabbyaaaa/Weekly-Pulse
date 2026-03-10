@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine Concepts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #e7e5e4; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Phone Mockup Container -->
+    <div class="w-full max-w-[400px] h-[800px] bg-stone-50 rounded-[3rem] shadow-2xl border-[12px] border-stone-800 relative overflow-hidden flex flex-col">
+        
+        <!-- Header / Tabs -->
+        <div class="bg-white pt-12 pb-4 px-6 shadow-sm z-10">
+            <h1 class="text-xl font-bold text-stone-800 mb-4">Daily Routine</h1>
+            <div class="flex bg-stone-100 p-1 rounded-xl">
+                <button onclick="showTab('concept1')" id="btn-concept1" class="flex-1 py-1.5 text-xs font-medium rounded-lg bg-white shadow-sm text-indigo-600 transition-all">1. Timeline</button>
+                <button onclick="showTab('concept2')" id="btn-concept2" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-all">2. Blocks</button>
+                <button onclick="showTab('concept3')" id="btn-concept3" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-all">3. Focus</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto hide-scrollbar relative">
+            
+            <!-- ==========================================
+                 CONCEPT 1: Vertical Timeline
+                 ========================================== -->
+            <div id="concept1" class="p-6 pb-24">
+                <p class="text-xs text-stone-500 mb-6">帶有「彈性區塊」的垂直時間軸。精確時間點與時段區塊混合。</p>
+                
+                <div class="relative pl-12 border-l-2 border-stone-200 space-y-8 ml-4">
+                    
+                    <!-- Precise Task -->
+                    <div class="relative">
+                        <div class="absolute -left-[59px] top-0 text-xs font-bold text-stone-400 w-10 text-right">05:30</div>
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-stone-50 bg-indigo-500"></div>
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-stone-100 flex items-center gap-3">
+                            <i data-lucide="sun" class="w-5 h-5 text-amber-500"></i>
+                            <span class="font-medium text-stone-800 text-sm">起床 (Wake up)</span>
+                        </div>
+                    </div>
+
+                    <!-- Block Task -->
+                    <div class="relative">
+                        <div class="absolute -left-[59px] top-0 text-xs font-bold text-stone-400 w-10 text-right">06:00</div>
+                        <div class="absolute -left-[59px] bottom-0 text-xs font-bold text-stone-400 w-10 text-right">07:00</div>
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-stone-50 bg-emerald-500"></div>
+                        <div class="absolute -left-[9px] bottom-1 w-4 h-4 rounded-full border-4 border-stone-50 bg-stone-300"></div>
+                        <div class="absolute -left-[2px] top-4 bottom-4 w-0.5 bg-emerald-200"></div>
+                        
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-2 mb-1">
+                                <i data-lucide="dumbbell" class="w-4 h-4 text-emerald-600"></i>
+                                <span class="font-bold text-emerald-800 text-sm">晨間運動</span>
+                            </div>
+                            <p class="text-xs text-emerald-600">跑步機 30 分鐘 + 核心訓練</p>
+                        </div>
+                    </div>
+
+                    <!-- Flexible Task (No specific time, just "Morning") -->
+                    <div class="relative">
+                        <div class="absolute -left-[59px] top-2 text-xs font-medium text-stone-400 w-10 text-right">早上</div>
+                        <div class="absolute -left-[7px] top-3 w-2.5 h-2.5 rounded-full bg-stone-300"></div>
+                        <div class="flex items-center gap-3 py-2">
+                            <div class="w-5 h-5 rounded border-2 border-stone-300 flex items-center justify-center"></div>
+                            <span class="text-sm text-stone-600">吃益生菌</span>
+                        </div>
+                    </div>
+
+                    <!-- Precise Task -->
+                    <div class="relative">
+                        <div class="absolute -left-[59px] top-0 text-xs font-bold text-indigo-600 w-10 text-right">10:00</div>
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-stone-50 bg-indigo-600 shadow-[0_0_0_4px_rgba(79,70,229,0.2)]"></div>
+                        <div class="bg-indigo-600 p-3 rounded-xl shadow-md flex items-center justify-between">
+                            <div class="flex items-center gap-3 text-white">
+                                <i data-lucide="pill" class="w-5 h-5"></i>
+                                <span class="font-medium text-sm">補充維生素 D3</span>
+                            </div>
+                            <button class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"><i data-lucide="check" class="w-4 h-4 text-white"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 CONCEPT 2: Time-Blocked List
+                 ========================================== -->
+            <div id="concept2" class="p-6 pb-24 hidden">
+                <p class="text-xs text-stone-500 mb-6">時段分組清單。乾淨、減壓，專注於每個時段的待辦事項。</p>
+
+                <!-- Morning Block -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                            <i data-lucide="sunrise" class="w-4 h-4"></i>
+                        </div>
+                        <h2 class="font-bold text-stone-800">晨間儀式 (Morning)</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                        <div class="p-3 border-b border-stone-50 flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full border-2 border-stone-300"></div>
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">05:30</span>
+                            <span class="text-sm font-medium text-stone-700">起床</span>
+                        </div>
+                        <div class="p-3 border-b border-stone-50 flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full border-2 border-stone-300"></div>
+                            <span class="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded-md">06:00 - 07:00</span>
+                            <span class="text-sm font-medium text-stone-700">運動</span>
+                        </div>
+                        <div class="p-3 flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full border-2 border-stone-300"></div>
+                            <span class="text-sm font-medium text-stone-700">吃益生菌</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Block -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i>
+                        </div>
+                        <h2 class="font-bold text-stone-800">上午專注 (Deep Work)</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                        <div class="p-3 border-b border-stone-50 flex items-center gap-3 bg-indigo-50/50">
+                            <div class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center"><i data-lucide="check" class="w-3 h-3 text-white"></i></div>
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md">10:00</span>
+                            <span class="text-sm font-medium text-stone-400 line-through">吃維生素 D3</span>
+                        </div>
+                        <div class="p-3 flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full border-2 border-stone-300"></div>
+                            <span class="text-sm font-medium text-stone-700">處理最重要的一項工作</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 CONCEPT 3: Now & Next Focus
+                 ========================================== -->
+            <div id="concept3" class="p-6 pb-24 hidden h-full flex flex-col">
+                <p class="text-xs text-stone-500 mb-6">動態的「現在與下一步」。極度專注，像貼身助理一樣引導。</p>
+
+                <!-- NOW Card -->
+                <div class="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-200 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10"></div>
+                    <div class="text-indigo-200 text-xs font-bold tracking-wider uppercase mb-4 flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></div>
+                        現在該做 (NOW)
+                    </div>
+                    
+                    <div class="text-4xl font-light mb-2">10:00</div>
+                    <h2 class="text-2xl font-bold mb-6">補充維生素 D3</h2>
+                    
+                    <button class="w-full bg-white text-indigo-600 font-bold py-4 rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-indigo-50 transition-colors">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        完成 (Mark Done)
+                    </button>
+                </div>
+
+                <!-- NEXT Section -->
+                <div class="flex-1">
+                    <h3 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4">接下來 (NEXT)</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4 opacity-80">
+                            <div class="text-center w-12">
+                                <div class="text-xs text-stone-400 font-bold">12:00</div>
+                            </div>
+                            <div class="w-px h-8 bg-stone-200"></div>
+                            <div>
+                                <div class="font-medium text-stone-700 text-sm">午餐與休息</div>
+                                <div class="text-xs text-stone-400">遠離螢幕 30 分鐘</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4 opacity-60">
+                            <div class="text-center w-12">
+                                <div class="text-xs text-stone-400 font-bold">13:30</div>
+                            </div>
+                            <div class="w-px h-8 bg-stone-200"></div>
+                            <div>
+                                <div class="font-medium text-stone-700 text-sm">下午工作時段</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==========================================
+             STATE-BASED PLAYBOOK (SOS BUTTON)
+             ========================================== -->
+        <div class="absolute bottom-6 right-6 z-50">
+            <button onclick="toggleSOS()" class="w-14 h-14 bg-stone-800 text-white rounded-full shadow-xl flex items-center justify-center hover:scale-105 transition-transform">
+                <i data-lucide="life-buoy" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- SOS Modal / Bottom Sheet -->
+        <div id="sos-modal" class="absolute inset-0 bg-stone-900/40 z-40 hidden flex-col justify-end backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-t-3xl p-6 transform transition-transform translate-y-0 h-[70%] flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-stone-800">狀態急救包</h2>
+                    <button onclick="toggleSOS()" class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <p class="text-sm text-stone-500 mb-4">你現在感覺如何？選擇一個狀態，查看應對方案。</p>
+                
+                <div class="space-y-3 overflow-y-auto hide-scrollbar pb-6">
+                    <!-- State 1 -->
+                    <div class="border border-stone-200 rounded-2xl overflow-hidden">
+                        <button onclick="toggleState('state-anxious')" class="w-full p-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition-colors text-left">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">😰</span>
+                                <span class="font-bold text-stone-700">感到焦慮、思緒混亂</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-stone-400"></i>
+                        </button>
+                        <div id="state-anxious" class="p-4 bg-white border-t border-stone-100 hidden">
+                            <ul class="space-y-3">
+                                <li class="flex gap-3 text-sm text-stone-600">
+                                    <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
+                                    <span>執行 <b>4-7-8 呼吸法</b> 3 次 (吸氣4秒，憋氣7秒，吐氣8秒)。</span>
+                                </li>
+                                <li class="flex gap-3 text-sm text-stone-600">
+                                    <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
+                                    <span>拿出一張紙，寫下腦中所有擔憂的事 (Brain Dump)，不要過濾。</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- State 2 -->
+                    <div class="border border-stone-200 rounded-2xl overflow-hidden">
+                        <button onclick="toggleState('state-tired')" class="w-full p-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition-colors text-left">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🔋</span>
+                                <span class="font-bold text-stone-700">毫無精力、非常疲倦</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-stone-400"></i>
+                        </button>
+                        <div id="state-tired" class="p-4 bg-white border-t border-stone-100 hidden">
+                            <ul class="space-y-3">
+                                <li class="flex gap-3 text-sm text-stone-600">
+                                    <div class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
+                                    <span>喝一大杯溫水。</span>
+                                </li>
+                                <li class="flex gap-3 text-sm text-stone-600">
+                                    <div class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
+                                    <span>設定 15 分鐘鬧鐘，閉目養神或聽 NSDR (非睡眠深度休息) 音頻。</span>
+                                </li>
+                                <li class="flex gap-3 text-sm text-stone-600">
+                                    <div class="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">3</div>
+                                    <span>如果必須工作，只挑選清單上「最微小、最不費力」的一件事做。</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab Switching Logic
+        function showTab(tabId) {
+            document.getElementById('concept1').classList.add('hidden');
+            document.getElementById('concept2').classList.add('hidden');
+            document.getElementById('concept3').classList.add('hidden');
+            
+            document.getElementById('btn-concept1').className = 'flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-all';
+            document.getElementById('btn-concept2').className = 'flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-all';
+            document.getElementById('btn-concept3').className = 'flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-all';
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).className = 'flex-1 py-1.5 text-xs font-medium rounded-lg bg-white shadow-sm text-indigo-600 transition-all';
+        }
+
+        // SOS Modal Logic
+        function toggleSOS() {
+            const modal = document.getElementById('sos-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        // Accordion Logic for States
+        function toggleState(stateId) {
+            const el = document.getElementById(stateId);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

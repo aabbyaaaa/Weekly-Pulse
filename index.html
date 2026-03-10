@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google AI Studio App</title>
+    <script>
+      // Workaround for libraries that try to polyfill fetch
+      if (typeof window !== 'undefined') {
+        ['fetch', 'Headers', 'Request', 'Response'].forEach(prop => {
+          if (window[prop]) {
+            try {
+              const original = window[prop];
+              Object.defineProperty(window, prop, {
+                get: () => original,
+                set: () => {
+                  console.warn(`Ignored attempt to overwrite window.${prop}`);
+                },
+                configurable: true
+              });
+            } catch (e) {
+              console.warn(`Could not make window.${prop} writable`, e);
+            }
+          }
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

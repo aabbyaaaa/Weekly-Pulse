@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user settings and custom categories.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "color": { "type": "string" }
+            },
+            "required": ["id", "name", "color"]
+          }
+        }
+      },
+      "required": ["email", "categories"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A habit tracking task (build or limit).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "goal": { "type": "number" },
+        "category": { "type": "string" },
+        "type": { "type": "string", "enum": ["target", "limit"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "archived": { "type": "boolean" }
+      },
+      "required": ["name", "goal", "category", "type", "createdAt"]
+    },
+    "WeeklyRecord": {
+      "title": "Weekly Record",
+      "description": "Tracks the completion counts and timestamps of tasks for a specific week.",
+      "type": "object",
+      "properties": {
+        "weekId": { "type": "string" },
+        "records": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "number" },
+              "timestamps": {
+                "type": "array",
+                "items": { "type": "string", "format": "date-time" }
+              }
+            },
+            "required": ["count", "timestamps"]
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weekId", "records", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile document containing their custom categories."
+    },
+    "users/{userId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Individual habit tasks for the user."
+    },
+    "users/{userId}/weekly_records/{weekId}": {
+      "schema": { "$ref": "#/entities/WeeklyRecord" },
+      "description": "Weekly tracking records for the user's tasks."
+    }
+  }
+}

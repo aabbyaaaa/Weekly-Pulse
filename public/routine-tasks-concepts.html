@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine x Tasks: View Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #e7e5e4; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Checkbox Animation */
+        .checkbox-wrapper input:checked + div {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        .checkbox-wrapper input:checked + div svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Phone Mockup Container -->
+    <div class="w-full max-w-[400px] h-[800px] bg-stone-50 rounded-[3rem] shadow-2xl border-[12px] border-stone-800 relative overflow-hidden flex flex-col">
+        
+        <!-- Header / Tabs -->
+        <div class="bg-white pt-12 pb-4 px-6 shadow-sm z-10">
+            <h1 class="text-xl font-bold text-stone-800 mb-2">混合模式 x 雙視圖切換</h1>
+            <p class="text-xs text-stone-500 mb-4">固定習慣 (打勾) + 彈性插槽 (選任務)</p>
+            <div class="flex bg-stone-100 p-1 rounded-xl relative">
+                <!-- Active Tab Background Indicator -->
+                <div id="tab-indicator" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out z-0"></div>
+                
+                <button onclick="switchView('timeline')" id="btn-timeline" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-indigo-600 transition-colors z-10 relative">時間軸 (Timeline)</button>
+                <button onclick="switchView('blocks')" id="btn-blocks" class="flex-1 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:text-stone-700 transition-colors z-10 relative">區塊清單 (Blocks)</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto hide-scrollbar relative bg-stone-50">
+            
+            <!-- ==========================================
+                 VIEW 1: TIMELINE (時間軸)
+                 ========================================== -->
+            <div id="view-timeline" class="p-6 pb-24 relative">
+                <!-- Vertical Line -->
+                <div class="absolute left-[39px] top-6 bottom-24 w-px bg-stone-200"></div>
+
+                <div class="space-y-6">
+                    
+                    <!-- Fixed Time Item (Point in time) -->
+                    <div class="relative flex gap-4 group">
+                        <!-- Time & Dot -->
+                        <div class="w-12 flex flex-col items-end pt-3 relative z-10">
+                            <span class="text-xs font-bold text-stone-400">08:00</span>
+                            <div class="absolute right-[-5px] top-[14px] w-2.5 h-2.5 rounded-full bg-indigo-400 ring-4 ring-stone-50"></div>
+                        </div>
+                        <!-- Content Card -->
+                        <div class="flex-1 bg-white rounded-2xl shadow-sm border border-stone-100 p-4">
+                            <label class="flex items-start gap-3 cursor-pointer checkbox-wrapper">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center transition-colors mt-0.5 group-hover:border-indigo-400">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-stone-800 text-sm">吃益生菌與維生素</div>
+                                    <div class="text-[10px] text-stone-400 flex items-center gap-1 mt-1">
+                                        <i data-lucide="link" class="w-3 h-3"></i> 連動: 健康目標 (4/7)
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Duration Item (Block of time) -->
+                    <div class="relative flex gap-4 group">
+                        <!-- Time & Line -->
+                        <div class="w-12 flex flex-col items-end pt-3 relative z-10">
+                            <span class="text-xs font-bold text-stone-400">09:00</span>
+                            <span class="text-[10px] text-stone-300 mt-8">11:00</span>
+                            <!-- Duration Line -->
+                            <div class="absolute right-[-4px] top-[14px] w-2 h-12 rounded-full bg-emerald-400 ring-2 ring-stone-50"></div>
+                        </div>
+                        <!-- Content Card -->
+                        <div class="flex-1 bg-emerald-50/50 rounded-2xl shadow-sm border border-emerald-100 p-4">
+                            <label class="flex items-start gap-3 cursor-pointer checkbox-wrapper">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-emerald-300 flex items-center justify-center transition-colors mt-0.5 group-hover:border-emerald-500">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-emerald-900 text-sm">深度工作 (Deep Work)</div>
+                                    <div class="text-[10px] text-emerald-600/70 flex items-center gap-1 mt-1">
+                                        <i data-lucide="briefcase" class="w-3 h-3"></i> 固定時段習慣
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Flexible Slot (Empty) -->
+                    <div class="relative flex gap-4 group" id="timeline-slot-empty">
+                        <!-- Time & Line -->
+                        <div class="w-12 flex flex-col items-end pt-3 relative z-10">
+                            <span class="text-xs font-bold text-stone-400">19:00</span>
+                            <span class="text-[10px] text-stone-300 mt-8">20:00</span>
+                            <!-- Dashed Duration Line -->
+                            <div class="absolute right-[-4px] top-[14px] w-2 h-12 rounded-full border-2 border-dashed border-indigo-300 bg-stone-50"></div>
+                        </div>
+                        <!-- Content Card (Dashed) -->
+                        <div class="flex-1 bg-white rounded-2xl border-2 border-dashed border-indigo-200 p-4 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all" onclick="openSlotModal()">
+                            <div class="flex items-center gap-3 h-full">
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center">
+                                    <i data-lucide="plus" class="w-4 h-4 text-indigo-500"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-indigo-600 text-sm">選擇今晚的學習任務</div>
+                                    <div class="text-[10px] text-stone-400 mt-0.5">點擊從本週任務載入</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Flexible Slot (Filled - Hidden initially) -->
+                    <div class="relative flex gap-4 group hidden" id="timeline-slot-filled">
+                        <!-- Time & Line -->
+                        <div class="w-12 flex flex-col items-end pt-3 relative z-10">
+                            <span class="text-xs font-bold text-stone-400">19:00</span>
+                            <span class="text-[10px] text-stone-300 mt-8">20:00</span>
+                            <!-- Solid Duration Line -->
+                            <div class="absolute right-[-4px] top-[14px] w-2 h-12 rounded-full bg-indigo-400 ring-2 ring-stone-50"></div>
+                        </div>
+                        <!-- Content Card (Solid) -->
+                        <div class="flex-1 bg-indigo-50/50 rounded-2xl shadow-sm border border-indigo-200 p-4 relative overflow-hidden">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+                            <label class="flex items-start gap-3 cursor-pointer checkbox-wrapper">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-indigo-300 flex items-center justify-center transition-colors mt-0.5 group-hover:border-indigo-500">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-indigo-900 text-sm" id="timeline-task-title">看 2 堂線上課程</div>
+                                    <div class="text-[10px] text-indigo-600/70 flex items-center gap-1 mt-1">
+                                        <i data-lucide="check-circle-2" class="w-3 h-3"></i> 已從本週任務載入
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 VIEW 2: BLOCKS (區塊清單)
+                 ========================================== -->
+            <div id="view-blocks" class="p-6 pb-24 hidden space-y-8">
+                
+                <!-- Morning Block -->
+                <div>
+                    <div class="flex items-center gap-2 mb-3 pl-1">
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-500"></i>
+                        <h3 class="font-bold text-stone-800 text-sm">晨間儀式 (Morning)</h3>
+                    </div>
+                    
+                    <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
+                        <!-- Item 1 -->
+                        <div class="p-4 border-b border-stone-50">
+                            <label class="flex items-center gap-3 cursor-pointer checkbox-wrapper group">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-stone-300 flex items-center justify-center transition-colors group-hover:border-indigo-400">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="flex-1 flex justify-between items-center">
+                                    <span class="font-medium text-stone-800 text-sm">吃益生菌與維生素</span>
+                                    <span class="text-[10px] font-medium text-stone-400 bg-stone-100 px-2 py-1 rounded-md">08:00</span>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <!-- Item 2 -->
+                        <div class="p-4 bg-emerald-50/30">
+                            <label class="flex items-center gap-3 cursor-pointer checkbox-wrapper group">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-emerald-300 flex items-center justify-center transition-colors group-hover:border-emerald-500">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="flex-1 flex justify-between items-center">
+                                    <span class="font-medium text-emerald-900 text-sm">深度工作 (Deep Work)</span>
+                                    <span class="text-[10px] font-medium text-emerald-600/70 bg-emerald-100/50 px-2 py-1 rounded-md">09:00 - 11:00</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evening Block -->
+                <div>
+                    <div class="flex items-center gap-2 mb-3 pl-1">
+                        <i data-lucide="moon" class="w-4 h-4 text-indigo-500"></i>
+                        <h3 class="font-bold text-stone-800 text-sm">晚間充電 (Evening)</h3>
+                    </div>
+                    
+                    <div class="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden p-2">
+                        <!-- Flexible Slot (Empty) -->
+                        <div id="blocks-slot-empty" class="p-3 rounded-2xl border-2 border-dashed border-indigo-200 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all flex items-center gap-3" onclick="openSlotModal()">
+                            <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center">
+                                <i data-lucide="plus" class="w-4 h-4 text-indigo-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-indigo-600 text-sm">選擇今晚的學習任務</div>
+                                <div class="text-[10px] text-stone-400 mt-0.5">19:00 - 20:00</div>
+                            </div>
+                        </div>
+
+                        <!-- Flexible Slot (Filled - Hidden initially) -->
+                        <div id="blocks-slot-filled" class="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-100 hidden">
+                            <label class="flex items-center gap-3 cursor-pointer checkbox-wrapper group">
+                                <input type="checkbox" class="peer sr-only">
+                                <div class="w-5 h-5 rounded-full border-2 border-indigo-300 flex items-center justify-center transition-colors group-hover:border-indigo-500">
+                                    <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div class="flex-1 flex justify-between items-center">
+                                    <span class="font-medium text-indigo-900 text-sm" id="blocks-task-title">看 2 堂線上課程</span>
+                                    <span class="text-[10px] font-medium text-indigo-600/70 bg-indigo-100/50 px-2 py-1 rounded-md">19:00 - 20:00</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        
+        <!-- Bottom Sheet Modal for Selecting Task -->
+        <div id="slot-modal" class="absolute inset-0 bg-stone-900/40 z-50 hidden flex-col justify-end backdrop-blur-sm transition-opacity">
+            <div class="bg-white rounded-t-3xl p-6 transform transition-transform translate-y-0 h-[60%] flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-stone-800">選擇學習任務</h2>
+                    <button onclick="closeSlotModal()" class="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-stone-500 mb-4">以下是您本週尚未完成的學習類任務：</p>
+                
+                <div class="space-y-2 overflow-y-auto hide-scrollbar">
+                    <button class="w-full text-left p-4 rounded-xl border border-stone-200 hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center justify-between" onclick="fillSlot('看 2 堂線上課程')">
+                        <span class="font-medium text-stone-700 text-sm">看 2 堂線上課程</span>
+                        <span class="text-xs text-stone-400">0/2</span>
+                    </button>
+                    <button class="w-full text-left p-4 rounded-xl border border-stone-200 hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center justify-between" onclick="fillSlot('練習英文口說 15 分鐘')">
+                        <span class="font-medium text-stone-700 text-sm">練習英文口說 15 分鐘</span>
+                        <span class="text-xs text-stone-400">3/5</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab Switching Logic
+        function switchView(viewId) {
+            const timelineView = document.getElementById('view-timeline');
+            const blocksView = document.getElementById('view-blocks');
+            const btnTimeline = document.getElementById('btn-timeline');
+            const btnBlocks = document.getElementById('btn-blocks');
+            const indicator = document.getElementById('tab-indicator');
+            
+            if (viewId === 'timeline') {
+                timelineView.classList.remove('hidden');
+                blocksView.classList.add('hidden');
+                
+                btnTimeline.classList.add('text-indigo-600');
+                btnTimeline.classList.remove('text-stone-500');
+                btnBlocks.classList.remove('text-indigo-600');
+                btnBlocks.classList.add('text-stone-500');
+                
+                indicator.style.transform = 'translateX(0)';
+            } else {
+                timelineView.classList.add('hidden');
+                blocksView.classList.remove('hidden');
+                
+                btnBlocks.classList.add('text-indigo-600');
+                btnBlocks.classList.remove('text-stone-500');
+                btnTimeline.classList.remove('text-indigo-600');
+                btnTimeline.classList.add('text-stone-500');
+                
+                indicator.style.transform = 'translateX(100%)';
+            }
+        }
+
+        // Modal Logic
+        function openSlotModal() {
+            const modal = document.getElementById('slot-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        
+        function closeSlotModal() {
+            const modal = document.getElementById('slot-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Fill Slot Logic (Simulating selecting a task)
+        function fillSlot(taskName) {
+            // Update Timeline View
+            document.getElementById('timeline-slot-empty').classList.add('hidden');
+            document.getElementById('timeline-slot-filled').classList.remove('hidden');
+            document.getElementById('timeline-task-title').innerText = taskName;
+            
+            // Update Blocks View
+            document.getElementById('blocks-slot-empty').classList.add('hidden');
+            document.getElementById('blocks-slot-filled').classList.remove('hidden');
+            document.getElementById('blocks-task-title').innerText = taskName;
+            
+            closeSlotModal();
+        }
+    </script>
+</body>
+</html>

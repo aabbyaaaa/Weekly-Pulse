@@ -1,0 +1,149 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - email: string (required)
+    //   - categories: list of objects (required)
+    //
+    // Collection: users/{userId}/tasks
+    // Document ID: {taskId}
+    // Fields:
+    //   - name: string (required)
+    //   - goal: number (required)
+    //   - category: string (required)
+    //   - type: string (required, 'target' or 'limit')
+    //   - createdAt: string (required, ISO 8601 date string)
+    //
+    // Collection: users/{userId}/weekly_records
+    // Document ID: {weekId}
+    // Fields:
+    //   - weekId: string (required)
+    //   - records: map (required)
+    //   - updatedAt: string (required, ISO 8601 date string)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // Domain Validators
+    function isValidUserProfile() {
+      return hasOnlyAllowedFields(['email', 'categories']) &&
+             hasRequiredFields(['email', 'categories']) &&
+             isValidEmail(request.resource.data.email) &&
+             request.resource.data.categories is list &&
+             request.resource.data.categories.size() <= 50; // max 50 categories
+    }
+
+    function isValidTask() {
+      return hasOnlyAllowedFields(['name', 'goal', 'category', 'type', 'createdAt', 'archived']) &&
+             hasRequiredFields(['name', 'goal', 'category', 'type', 'createdAt', 'archived']) &&
+             request.resource.data.name is string &&
+             request.resource.data.name.size() > 0 &&
+             request.resource.data.name.size() <= 100 &&
+             request.resource.data.goal is number &&
+             request.resource.data.goal > 0 &&
+             request.resource.data.goal <= 100 &&
+             request.resource.data.category is string &&
+             request.resource.data.category.size() <= 50 &&
+             request.resource.data.type in ['target', 'limit'] &&
+             request.resource.data.archived is bool &&
+             isValidDateString(request.resource.data.createdAt);
+    }
+
+    function isValidWeeklyRecord() {
+      return hasOnlyAllowedFields(['weekId', 'records', 'updatedAt']) &&
+             hasRequiredFields(['weekId', 'records', 'updatedAt']) &&
+             request.resource.data.weekId is string &&
+             request.resource.data.weekId.size() <= 20 &&
+             request.resource.data.records is map &&
+             isValidDateString(request.resource.data.updatedAt);
+    }
+
+    function isValidRoutine() {
+      return hasOnlyAllowedFields(['title', 'type', 'time', 'block', 'duration', 'linkedTaskId']) &&
+             hasRequiredFields(['title', 'type', 'time', 'block']) &&
+             request.resource.data.title is string &&
+             request.resource.data.title.size() > 0 &&
+             request.resource.data.title.size() <= 100 &&
+             request.resource.data.type in ['habit', 'slot'] &&
+             request.resource.data.time is string &&
+             request.resource.data.time.size() <= 10 &&
+             request.resource.data.block in ['morning', 'afternoon', 'evening'] &&
+             (!('duration' in request.resource.data) || (request.resource.data.duration is number && request.resource.data.duration > 0)) &&
+             (!('linkedTaskId' in request.resource.data) || (request.resource.data.linkedTaskId is string && request.resource.data.linkedTaskId.size() <= 50));
+    }
+
+    function isValidDailyRecord() {
+      return hasOnlyAllowedFields(['date', 'routines']) &&
+             hasRequiredFields(['date', 'routines']) &&
+             request.resource.data.date is string &&
+             request.resource.data.date.size() <= 20 &&
+             request.resource.data.routines is map;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile();
+      allow update: if isOwner(userId) && isValidUserProfile();
+      allow delete: if isOwner(userId);
+
+      match /tasks/{taskId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTask();
+        allow update: if isOwner(userId) && isValidTask() &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /weekly_records/{weekId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidWeeklyRecord();
+        allow update: if isOwner(userId) && isValidWeeklyRecord();
+        allow delete: if isOwner(userId);
+      }
+
+      match /routines/{routineId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidRoutine();
+        allow update: if isOwner(userId) && isValidRoutine();
+        allow delete: if isOwner(userId);
+      }
+
+      match /daily_records/{dateId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidDailyRecord();
+        allow update: if isOwner(userId) && isValidDailyRecord();
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
