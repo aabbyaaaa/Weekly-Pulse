@@ -1,376 +1,241 @@
-import { useState, useEffect } from "react";
-import { AppState, Task, CategoryDef, WeeklyRecord, RoutineItem, DailyRecord, DailyRoutineState } from "../types";
-import { db, auth } from "../firebase";
-import { User } from "firebase/auth";
+import { create } from 'zustand';
+import { AppState, Task, Routine, DailyRoutineState, User } from '../types';
+import { db, auth } from '../firebase';
 import { 
   collection, 
   doc, 
-  onSnapshot, 
   setDoc, 
-  updateDoc, 
   deleteDoc, 
-  getDoc,
-  writeBatch
-} from "firebase/firestore";
+  onSnapshot,
+  query,
+  where,
+  getDocs
+} from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
+interface StoreActions {
+  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  updateTask: (id: string, updates: Partial<Task>) => void;
+  deleteTask: (id: string) => void;
+  
+  addRoutine: (routine: Omit<Routine, 'id'>) => void;
+  updateRoutine: (id: string, updates: Partial<Routine>) => void;
+  deleteRoutine: (id: string) => void;
+  
+  updateDailyRoutine: (date: string, routineId: string, updates: Partial<DailyRoutineState>) => void;
+  
+  setUser: (user: User | null) => void;
+  logout: () => Promise<void>;
+  
+  initializeListeners: () => void;
 }
 
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId: string | undefined;
-    email: string | null | undefined;
-    emailVerified: boolean | undefined;
-    isAnonymous: boolean | undefined;
-    tenantId: string | null | undefined;
-    providerInfo: {
-      providerId: string;
-      displayName: string | null;
-      email: string | null;
-      photoUrl: string | null;
-    }[];
-  }
-}
+const initialState: AppState = {
+  tasks: [],
+  routines: [],
+  dailyRoutines: {},
+  user: null,
+  loading: true,
+  error: null,
+};
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
+export const useStore = create<AppState & StoreActions>((set, get) => {
+  let unsubTasks: (() => void) | null = null;
+  let unsubRoutines: (() => void) | null = null;
+  let unsubDailyRoutines: (() => void) | null = null;
 
-export const defaultCategories: CategoryDef[] = [
-  { id: 'health', name: 'Health', color: 'emerald' },
-  { id: 'hygiene', name: 'Hygiene', color: 'cyan' },
-  { id: 'exercise', name: 'Exercise', color: 'orange' },
-  { id: 'learning', name: 'Learning', color: 'blue' },
-  { id: 'other', name: 'Other', color: 'stone' },
-];
+  const cleanupListeners = () => {
+    if (unsubTasks) unsubTasks();
+    if (unsubRoutines) unsubRoutines();
+    if (unsubDailyRoutines) unsubDailyRoutines();
+  };
 
-export function useStore(user: User) {
-  const userId = user.uid;
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [records, setRecords] = useState<WeeklyRecord[]>([]);
-  const [categories, setCategories] = useState<CategoryDef[]>(defaultCategories);
-  const [routines, setRoutines] = useState<RoutineItem[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    // 1. Listen to User Profile (for categories)
-    const userRef = doc(db, "users", userId);
-    const unsubUser = onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.categories) {
-          setCategories(data.categories);
-        }
-      } else {
-        // Initialize user profile
-        setDoc(userRef, { email: user.email || "user@example.com", categories: defaultCategories }, { merge: true }).catch(error => handleFirestoreError(error, OperationType.WRITE, `users/${userId}`));
-      }
-    }, (error) => handleFirestoreError(error, OperationType.GET, `users/${userId}`));
-
-    // 2. Listen to Tasks
-    const tasksRef = collection(db, `users/${userId}/tasks`);
-    const unsubTasks = onSnapshot(tasksRef, (snapshot) => {
-      const newTasks: Task[] = [];
-      snapshot.forEach((doc) => {
-        newTasks.push({ id: doc.id, ...doc.data() } as Task);
+  // Setup auth listener immediately
+  onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      set({ 
+        user: { 
+          uid: firebaseUser.uid, 
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName
+        } 
       });
-      setTasks(newTasks);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${userId}/tasks`));
-
-    // 3. Listen to Weekly Records
-    const recordsRef = collection(db, `users/${userId}/weekly_records`);
-    const unsubRecords = onSnapshot(recordsRef, (snapshot) => {
-      const newRecords: WeeklyRecord[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        // Flatten records map to array of WeeklyRecord for the UI
-        if (data.records) {
-          Object.entries(data.records).forEach(([taskId, recordData]: [string, any]) => {
-            newRecords.push({
-              weekId: doc.id,
-              taskId,
-              count: recordData.count || 0,
-              timestamps: recordData.timestamps || []
-            });
-          });
-        }
-      });
-      setRecords(newRecords);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${userId}/weekly_records`));
-
-    // 4. Listen to Routines
-    const routinesRef = collection(db, `users/${userId}/routines`);
-    const unsubRoutines = onSnapshot(routinesRef, (snapshot) => {
-      const newRoutines: RoutineItem[] = [];
-      snapshot.forEach((doc) => {
-        newRoutines.push({ id: doc.id, ...doc.data() } as RoutineItem);
-      });
-      setRoutines(newRoutines);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${userId}/routines`));
-
-    // 5. Listen to Daily Records
-    const dailyRecordsRef = collection(db, `users/${userId}/daily_records`);
-    const unsubDailyRecords = onSnapshot(dailyRecordsRef, (snapshot) => {
-      const newDailyRecords: DailyRecord[] = [];
-      snapshot.forEach((doc) => {
-        newDailyRecords.push({ date: doc.id, routines: doc.data().routines || {} });
-      });
-      setDailyRecords(newDailyRecords);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${userId}/daily_records`));
-
-    return () => {
-      unsubUser();
-      unsubTasks();
-      unsubRecords();
-      unsubRoutines();
-      unsubDailyRecords();
-    };
-  }, [userId]);
-
-  const addTask = async (task: Omit<Task, "id" | "createdAt">) => {
-    try {
-      const newTaskRef = doc(collection(db, `users/${userId}/tasks`));
-      const now = new Date().toISOString();
-      await setDoc(newTaskRef, {
-        ...task,
-        createdAt: now,
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `users/${userId}/tasks`);
+      get().initializeListeners();
+    } else {
+      cleanupListeners();
+      set({ ...initialState, loading: false });
     }
-  };
-
-  const updateTask = async (id: string, updates: Partial<Omit<Task, "id" | "createdAt">>) => {
-    try {
-      const taskRef = doc(db, `users/${userId}/tasks`, id);
-      await updateDoc(taskRef, updates);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/tasks/${id}`);
-    }
-  };
-
-  const toggleArchiveTask = async (id: string, currentArchivedStatus: boolean | undefined) => {
-    try {
-      const taskRef = doc(db, `users/${userId}/tasks`, id);
-      await updateDoc(taskRef, { archived: !currentArchivedStatus });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/tasks/${id}`);
-    }
-  };
-
-  const deleteTask = async (id: string) => {
-    try {
-      const taskRef = doc(db, `users/${userId}/tasks`, id);
-      await deleteDoc(taskRef);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `users/${userId}/tasks/${id}`);
-    }
-  };
-
-  const incrementRecord = async (weekId: string, taskId: string) => {
-    try {
-      const recordRef = doc(db, `users/${userId}/weekly_records`, weekId);
-      const recordSnap = await getDoc(recordRef);
-      
-      const now = new Date().toISOString();
-      if (recordSnap.exists()) {
-        const data = recordSnap.data();
-        const currentRecord = data.records?.[taskId] || { count: 0, timestamps: [] };
-        await updateDoc(recordRef, {
-          [`records.${taskId}`]: {
-            count: currentRecord.count + 1,
-            timestamps: [...(currentRecord.timestamps || []), now]
-          },
-          updatedAt: now
-        });
-      } else {
-        await setDoc(recordRef, {
-          weekId,
-          records: { 
-            [taskId]: { count: 1, timestamps: [now] } 
-          },
-          updatedAt: now
-        });
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/weekly_records/${weekId}`);
-    }
-  };
-
-  const decrementRecord = async (weekId: string, taskId: string) => {
-    try {
-      const recordRef = doc(db, `users/${userId}/weekly_records`, weekId);
-      const recordSnap = await getDoc(recordRef);
-      
-      if (recordSnap.exists()) {
-        const data = recordSnap.data();
-        const currentRecord = data.records?.[taskId];
-        if (currentRecord && currentRecord.count > 0) {
-          await updateDoc(recordRef, {
-            [`records.${taskId}`]: {
-              count: currentRecord.count - 1,
-              timestamps: (currentRecord.timestamps || []).slice(0, -1)
-            },
-            updatedAt: new Date().toISOString()
-          });
-        }
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/weekly_records/${weekId}`);
-    }
-  };
-
-  const addCategory = async (category: Omit<CategoryDef, "id">) => {
-    try {
-      const newCategory = { ...category, id: crypto.randomUUID() };
-      const newCategories = [...categories, newCategory];
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { categories: newCategories });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
-    }
-  };
-
-  const updateCategory = async (id: string, updates: Partial<Omit<CategoryDef, "id">>) => {
-    try {
-      const newCategories = categories.map(c => c.id === id ? { ...c, ...updates } : c);
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { categories: newCategories });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
-    }
-  };
-
-  const deleteCategory = async (id: string) => {
-    try {
-      const fallbackId = categories.find(c => c.id !== id)?.id || 'other';
-      const newCategories = categories.filter(c => c.id !== id);
-      
-      const batch = writeBatch(db);
-      const userRef = doc(db, "users", userId);
-      batch.update(userRef, { categories: newCategories });
-
-      // Reassign tasks
-      tasks.forEach(t => {
-        if (t.category === id) {
-          const taskRef = doc(db, `users/${userId}/tasks`, t.id);
-          batch.update(taskRef, { category: fallbackId });
-        }
-      });
-
-      await batch.commit();
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `users/${userId} (batch)`);
-    }
-  };
-
-  const addRoutine = async (routine: Omit<RoutineItem, "id">) => {
-    try {
-      const newRoutineRef = doc(collection(db, `users/${userId}/routines`));
-      await setDoc(newRoutineRef, routine);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `users/${userId}/routines`);
-    }
-  };
-
-  const updateRoutine = async (id: string, updates: Partial<Omit<RoutineItem, "id">>) => {
-    try {
-      const routineRef = doc(db, `users/${userId}/routines`, id);
-      await updateDoc(routineRef, updates);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/routines/${id}`);
-    }
-  };
-
-  const deleteRoutine = async (id: string) => {
-    try {
-      const routineRef = doc(db, `users/${userId}/routines`, id);
-      await deleteDoc(routineRef);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `users/${userId}/routines/${id}`);
-    }
-  };
-
-  const updateDailyRoutine = async (date: string, routineId: string, state: Partial<DailyRoutineState>) => {
-    try {
-      const dailyRecordRef = doc(db, `users/${userId}/daily_records`, date);
-      const dailyRecordSnap = await getDoc(dailyRecordRef);
-      
-      if (dailyRecordSnap.exists()) {
-        const data = dailyRecordSnap.data();
-        const currentRoutines = data.routines || {};
-        const currentRoutineState = currentRoutines[routineId] || { completed: false };
-        
-        await updateDoc(dailyRecordRef, {
-          [`routines.${routineId}`]: {
-            ...currentRoutineState,
-            ...state
-          }
-        });
-      } else {
-        await setDoc(dailyRecordRef, {
-          date,
-          routines: {
-            [routineId]: {
-              completed: false,
-              ...state
-            }
-          }
-        });
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `users/${userId}/daily_records/${date}`);
-    }
-  };
+  });
 
   return {
-    tasks,
-    records,
-    categories,
-    routines,
-    dailyRecords,
-    addTask,
-    updateTask,
-    toggleArchiveTask,
-    deleteTask,
-    incrementRecord,
-    decrementRecord,
-    addCategory,
-    updateCategory,
-    deleteCategory,
-    addRoutine,
-    updateRoutine,
-    deleteRoutine,
-    updateDailyRoutine,
+    ...initialState,
+
+    setUser: (user) => set({ user }),
+    
+    logout: async () => {
+      try {
+        await signOut(auth);
+        cleanupListeners();
+        set({ ...initialState, loading: false });
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    },
+
+    initializeListeners: () => {
+      const { user } = get();
+      if (!user) return;
+
+      set({ loading: true });
+
+      // Listen to Tasks
+      const tasksQuery = query(collection(db, 'tasks'), where('userId', '==', user.uid));
+      unsubTasks = onSnapshot(tasksQuery, (snapshot) => {
+        const tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+        set({ tasks });
+      }, (error) => {
+        console.error("Error fetching tasks:", error);
+        set({ error: error.message });
+      });
+
+      // Listen to Routines
+      const routinesQuery = query(collection(db, 'routines'), where('userId', '==', user.uid));
+      unsubRoutines = onSnapshot(routinesQuery, (snapshot) => {
+        const routines = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Routine));
+        set({ routines });
+      }, (error) => {
+        console.error("Error fetching routines:", error);
+        set({ error: error.message });
+      });
+
+      // Listen to Daily Routines
+      const dailyRoutinesQuery = query(collection(db, 'dailyRoutines'), where('userId', '==', user.uid));
+      unsubDailyRoutines = onSnapshot(dailyRoutinesQuery, (snapshot) => {
+        const dailyRoutines: Record<string, DailyRoutineState> = {};
+        snapshot.docs.forEach(doc => {
+          const data = doc.data() as DailyRoutineState;
+          dailyRoutines[data.id] = data;
+        });
+        set({ dailyRoutines, loading: false });
+      }, (error) => {
+        console.error("Error fetching daily routines:", error);
+        set({ error: error.message, loading: false });
+      });
+    },
+
+    addTask: async (taskData) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        const newTaskRef = doc(collection(db, 'tasks'));
+        const task = {
+          ...taskData,
+          id: newTaskRef.id,
+          createdAt: Date.now(),
+          userId: user.uid
+        };
+        await setDoc(newTaskRef, task);
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
+    },
+
+    updateTask: async (id, updates) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        const taskRef = doc(db, 'tasks', id);
+        await setDoc(taskRef, updates, { merge: true });
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    },
+
+    deleteTask: async (id) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        await deleteDoc(doc(db, 'tasks', id));
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
+    },
+
+    addRoutine: async (routineData) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        const newRoutineRef = doc(collection(db, 'routines'));
+        const routine = {
+          ...routineData,
+          id: newRoutineRef.id,
+          userId: user.uid
+        };
+        await setDoc(newRoutineRef, routine);
+      } catch (error) {
+        console.error("Error adding routine:", error);
+      }
+    },
+
+    updateRoutine: async (id, updates) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        const routineRef = doc(db, 'routines', id);
+        await setDoc(routineRef, updates, { merge: true });
+      } catch (error) {
+        console.error("Error updating routine:", error);
+      }
+    },
+
+    deleteRoutine: async (id) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        await deleteDoc(doc(db, 'routines', id));
+        
+        // Also delete associated daily routines
+        const dailyRoutinesQuery = query(
+          collection(db, 'dailyRoutines'), 
+          where('userId', '==', user.uid),
+          where('routineId', '==', id)
+        );
+        const snapshot = await getDocs(dailyRoutinesQuery);
+        snapshot.forEach(async (docSnapshot) => {
+          await deleteDoc(doc(db, 'dailyRoutines', docSnapshot.id));
+        });
+        
+      } catch (error) {
+        console.error("Error deleting routine:", error);
+      }
+    },
+
+    updateDailyRoutine: async (date, routineId, updates) => {
+      const { user } = get();
+      if (!user) return;
+
+      try {
+        const id = `${date}_${routineId}`;
+        const dailyRoutineRef = doc(db, 'dailyRoutines', id);
+        
+        const data = {
+          ...updates,
+          id,
+          date,
+          routineId,
+          userId: user.uid
+        };
+        
+        await setDoc(dailyRoutineRef, data, { merge: true });
+      } catch (error) {
+        console.error("Error updating daily routine:", error);
+      }
+    },
   };
-}
+});
